@@ -16,9 +16,12 @@ class RoomTypeFactory(factory.Factory):
     type = factory.Sequence(lambda n: n)
     size = factory.Faker('random_int', min=1, max=100)
     frequency_of_use = factory.Faker('random_int', min=1, max=365)
-    cost_of_maintenance = factory.Faker('pyfloat', min_value=1, right_digits=2)
-    cost_of_building = factory.Faker('pyfloat', min_value=1, right_digits=2)
-    cost_per_day = factory.Faker('pyfloat', min_value=1, right_digits=2)
+    cost_of_maintenance = factory.Faker(
+        'pyfloat', min_value=1, max_value=200000, right_digits=2)
+    cost_of_building = factory.Faker(
+        'pyfloat', min_value=1, max_value=200000, right_digits=2)
+    cost_per_day = factory.Faker(
+        'pyfloat', min_value=1, max_value=50000, right_digits=2)
 
 
 class DataFactory(factory.Factory):
@@ -34,7 +37,8 @@ class DataFactory(factory.Factory):
         if extracted is None:
             return
 
-        self.room_types = random.sample(extracted, k=random.randint(1, len(extracted)))
+        self.room_types = random.sample(
+            extracted, k=random.randint(1, len(extracted)))
         self.room_count = [0] * len(self.room_types)
 
         min_size = min(self.room_types, key=lambda room: room.size).size
