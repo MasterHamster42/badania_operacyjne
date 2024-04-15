@@ -1,8 +1,12 @@
 import random
 
 import factory
+import prettyprinter.extras.attrs
+from prettyprinter import cpprint
 
 from src.model import Data, RoomType
+
+prettyprinter.extras.attrs.install()
 
 
 class RoomTypeFactory(factory.Factory):
@@ -21,7 +25,7 @@ class DataFactory(factory.Factory):
     class Meta:
         model = Data
 
-    floor_capacity = factory.Faker('random_int', min=1)
+    floor_capacity: int = factory.Faker('random_int', min=1)
     room_types = []
     room_count = []
 
@@ -49,6 +53,7 @@ class DataFactory(factory.Factory):
 
 if __name__ == "__main__":
     rooms = RoomTypeFactory.build_batch(size=5)
-    print(rooms)
+    cpprint(rooms)
+
     data = DataFactory.build(room_types=rooms)
-    print(data)
+    cpprint(data)
