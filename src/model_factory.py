@@ -4,7 +4,7 @@ import factory
 import prettyprinter.extras.attrs
 from prettyprinter import cpprint
 
-from src.model import Data, RoomType
+from model import RoomType, Floor
 
 prettyprinter.extras.attrs.install()
 
@@ -26,38 +26,46 @@ class RoomTypeFactory(factory.Factory):
 
 class DataFactory(factory.Factory):
     class Meta:
-        model = Data
+        model = Floor
 
-    floor_capacity: int = factory.Faker('random_int', min=1)
-    room_types = []
-    room_count = []
-
+    capacity: int = factory.Faker('random_int', min=1)
+    corridor_capacity: int = factory.Faker('random_int', min=1)
+    budget: int = factory.Faker('random_int', min=1)
+    room_types: list[RoomType] = []
+    min_room_num: list[int] = []
+    room_count: list[int] = []
+    
     @factory.post_generation
-    def room_types(self, create, extracted: list[RoomType], **kwargs):
-        if extracted is None:
-            return
-
-        self.room_types = random.sample(
-            extracted, k=random.randint(1, len(extracted)))
-        self.room_count = [0] * len(self.room_types)
-
+    def room_types(self, _, extracted, **kwargs):
+        self.room_types = extracted
+        self.room_count = [x for x in self.min_room_num]
+        
         min_size = min(self.room_types, key=lambda room: room.size).size
-        capacity = self.floor_capacity
+        min_cost = min(self.room_types, key=lambda room: room.cost_of_building).cost_of_building
+        capacity = self.capacity
+        budget = self.budget
+        
+        capacity -= self.corridor_capacity
+        for room, count in zip(self.room_types, self.room_count):
+            capacity -= room.size * count
+            budget -= room.cost_of_building * count
 
-        while min_size < capacity:
-            choice = random.randint(0, len(self.room_types)-1)
-            room_type = self.room_types[choice]
-
-            if capacity - room_type.size < 0:
-                continue
+        while min_size < capacity and min_cost < budget:
+            room_types = [x for x in self.room_types if x.size < capacity and x.cost_of_building < budget]
+            choice = 0 if len(room_types) <= 1 else random.randint(0, len(room_types)-1)
+            room_type = room_types[choice]
 
             capacity -= room_type.size
+            budget -= room_type.cost_of_building
             self.room_count[choice] += 1
+            
+        
 
 
 if __name__ == "__main__":
     rooms = RoomTypeFactory.build_batch(size=5)
     cpprint(rooms)
 
-    data = DataFactory.build(room_types=rooms)
+    min_room_num = [1 for _ in rooms]
+    data = DataFactory.build_batch(size=10, capacity=1000, corridor_capacity=100, budget=1000000, min_room_num=min_room_num, room_types=rooms)
     cpprint(data)
