@@ -24,7 +24,7 @@ class RoomTypeFactory(factory.Factory):
         'pyfloat', min_value=1, max_value=50000, right_digits=2)
 
 
-class DataFactory(factory.Factory):
+class FloorFactory(factory.Factory):
     class Meta:
         model = Floor
 
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     cpprint(rooms)
 
     min_room_num = [1 for _ in rooms]
-    data = DataFactory.build_batch(size=10, capacity=1000, corridor_capacity=100, budget=1000000, min_room_num=min_room_num, room_types=rooms)
+    data = FloorFactory.build_batch(size=10, capacity=1000, corridor_capacity=100, budget=1000000, min_room_num=min_room_num, room_types=rooms)
     cpprint(data)

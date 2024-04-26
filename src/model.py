@@ -29,7 +29,7 @@ class Floor:
     def check_limitations(self) -> bool:
         return (self._check_capacity() and 
                 self._check_room_count() and 
-                self._check_buget())
+                self._check_budget())
         
     def _check_capacity(self) -> bool:
         room_capacity = 0
