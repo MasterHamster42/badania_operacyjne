@@ -22,7 +22,7 @@ class Floor:
     def calculate_fitness(self) -> float:
         income = 0
         for room, count in zip(self.room_types, self.room_count):
-            income += room.cost_per_day * (room.frequency_of_use - room.cost_of_maintenance)
+            income += room.cost_per_day * room.frequency_of_use - room.cost_of_maintenance
             income *= count
         return income
     
