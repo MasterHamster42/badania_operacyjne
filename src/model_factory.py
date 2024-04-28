@@ -4,7 +4,7 @@ import factory
 import prettyprinter.extras.attrs
 from prettyprinter import cpprint
 
-from model import RoomType, Floor
+from src.model import RoomType, Floor
 
 prettyprinter.extras.attrs.install()
 
@@ -58,8 +58,6 @@ class FloorFactory(factory.Factory):
             capacity -= room_type.size
             budget -= room_type.cost_of_building
             self.room_count[choice] += 1
-            
-        
 
 
 if __name__ == "__main__":

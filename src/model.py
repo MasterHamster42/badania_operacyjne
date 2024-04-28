@@ -9,7 +9,8 @@ class RoomType:
     cost_of_maintenance: float
     cost_of_building: float
     cost_per_day: float
-    
+
+
 @define
 class Floor:
     capacity: int
@@ -18,7 +19,21 @@ class Floor:
     room_types: list[RoomType] = []
     min_room_num: list[int] = []
     room_count: list[int] = []
-    
+
+    @property
+    def cost(self) -> int:
+        cost = 0
+        for room, count in zip(self.room_types, self.room_count):
+            cost += count * room.cost_of_building
+        return cost
+
+    @property
+    def remaining_capacity(self) -> int:
+        room_capacity = 0
+        for room, count in zip(self.room_types, self.room_count):
+            room_capacity += room.size * count
+        return self.capacity - self.corridor_capacity - room_capacity
+
     def calculate_fitness(self) -> float:
         income = 0
         for room, count in zip(self.room_types, self.room_count):
@@ -32,10 +47,7 @@ class Floor:
                 self._check_budget())
         
     def _check_capacity(self) -> bool:
-        room_capacity = 0
-        for room, count in zip(self.room_types, self.room_count):
-            room_capacity += room.size * count
-        return room_capacity <= self.capacity - self.corridor_capacity
+        return self.remaining_capacity >= 0
         
     def _check_room_count(self) -> bool:
         for count, min_count in zip(self.room_count, self.min_room_num):
@@ -44,7 +56,4 @@ class Floor:
         return True
     
     def _check_budget(self) -> bool:
-        cost = 0
-        for room, count in zip(self.room_types, self.room_count):
-            cost += count * room.cost_of_building
-        return cost < self.budget
+        return self.cost < self.budget
