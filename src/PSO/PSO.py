@@ -69,6 +69,14 @@ def bee_algorithm(
 # Example:
 if __name__ == "__main__":
     rooms = RoomTypeFactory.build_batch(size=NUM_ROOM_TYPES)
+    random_bee = Bee(FloorFactory.build(
+        capacity=CAPACITY,
+        corridor_capacity=CORRIDOR_CAPACITY,
+        budget=BUDGET,
+        min_room_num=[1 for _ in range(len(rooms))],
+        room_types=rooms
+    ))
     best_solution = bee_algorithm(NUM_BEES, NUM_ITERATIONS, rooms, CAPACITY, CORRIDOR_CAPACITY, BUDGET)
+    print(f"Losowe rozwiązanie: {random_bee.fitness:.2e}")
     print("Najlepsze rozwiązanie:", best_solution)
-    print("Wartość najlepszego rozwiązania: ", best_solution.fitness)
+    print(f"Wartość najlepszego rozwiązania: {best_solution.fitness:.2e}")
