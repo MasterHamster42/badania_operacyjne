@@ -8,7 +8,7 @@ from random import randint, sample
 class GeneticSearch:
      def __init__(self, initial_population: list[model.Floor], crossover_method=None, parents_size=None) -> None:
           self.initial_population: list[model.Floor] = initial_population
-          self.NO_IMPROVEMENT_TIME = 1000
+          self.NO_IMPROVEMENT_TIME = 300
           self.PARENTS_SIZE = len(self.initial_population)
           if crossover_method:
                self._crossover = crossover_method
@@ -32,14 +32,14 @@ class GeneticSearch:
                current_population = self._perform_mutaion(current_population)
                
                fitness = self._count_population_fitness(current_population)
-               if test_iter < 100:
-                    print(f'test iter: {test_iter} | highest_income: {highest_income}, fitness: {fitness}, result: {max(current_population, key=lambda genotype: genotype.calculate_fitness()).room_count}')
-               if test_iter % 100 == 0:
-                    # print('test iter', test_iter, ':', fitness, highest_income, max(current_population, key=lambda genotype: genotype.calculate_fitness()).room_count)
+               # if test_iter < 100:
+               #      print(f'test iter: {test_iter} | highest_income: {highest_income}, fitness: {fitness}, result: {max(current_population, key=lambda genotype: genotype.calculate_fitness()).room_count}')
+               if test_iter % 50 == 0:
                     print(f'test iter: {test_iter} | highest_fitness: {highest_income}, result: {the_best_genom.room_count}')
                if fitness > highest_income:
                     highest_income = fitness
                     the_best_genom = max(current_population, key=lambda genotype: genotype.calculate_fitness())
+                    cpprint(f'New genotype found | iter: {test_iter}, fitness: {fitness}, result: {the_best_genom.room_count}')
                     no_improvement_iter = 0
                else:
                     no_improvement_iter += 1
@@ -129,7 +129,8 @@ if __name__ == '__main__':
      cpprint(max(initial_population, key=lambda genotype: genotype.calculate_fitness()).room_count)
      result = alg.run()
      cpprint(result.calculate_fitness())
-     print(f'improve: {result.calculate_fitness() - alg._count_population_fitness(initial_population)}')
+     improve = result.calculate_fitness() - alg._count_population_fitness(initial_population)
+     print(f'improve: {improve}, {(improve/alg._count_population_fitness(initial_population)*100):.2f}%')
           
                
      
