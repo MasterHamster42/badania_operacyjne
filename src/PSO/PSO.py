@@ -1,3 +1,6 @@
+import seaborn as sns
+from matplotlib import pyplot as plt
+
 from src.model_factory import RoomTypeFactory, FloorFactory, RoomType
 from Bee import Bee, send_close_to_bee
 from constants import *
@@ -36,20 +39,25 @@ def update_best_solutions(global_best: list, new_bee: Bee):
 
 
 def bee_algorithm(
-        population_size: int,
-        num_iterations: int,
-        rooms: list[RoomType],
-        capacity: int,
-        corridor_capacity: int,
-        budget: int
-) -> Bee:
+    population_size: int,
+    num_iterations: int,
+    rooms: list[RoomType],
+    capacity: int,
+    corridor_capacity: int,
+    budget: int
+) -> tuple[Bee, list[float]]:
     population = initialize_population(population_size, rooms, capacity, corridor_capacity, budget)
     global_best = [None for _ in range(NUM_BEST_BEES)]
     """jak narazie global_best zostaja najlepsze odpowiedzi a wszystkie pszczoly sa wysylane gdzie indziej 
     i jesli sa lepsze wyniki to sa aktualizowane jak nie to zostaje jak jest i ciagle sie szuka kolo tego samego miejsca"""
+    history = []
+
     for _ in range(num_iterations):
         for bee in population:
             update_best_solutions(global_best, bee)
+
+        history.append(global_best[0].fitness)
+
         population = initialize_population(
             BEES_RANDOM, rooms, capacity, corridor_capacity, budget
         )  #some bees going to random places, trying to not fell for local extremum
@@ -61,9 +69,20 @@ def bee_algorithm(
             for _ in range(BEES_FOR_DOWN_BEST):
                 population.append(send_close_to_bee(bee, rooms))  # send_close_to_bee <- TO IMPLEMENT
 
-    for bee in global_best:
-        print(bee.fitness)
-    return global_best[0]
+    # for bee in global_best:
+    #     print(bee.fitness)
+    return global_best[0], history
+
+
+def plot_history(history: list[float]) -> None:
+    sns.set_theme()
+    x = range(len(history))
+
+    sns.lineplot(x=x, y=history)
+    plt.ylabel("Fitness")
+    plt.xlabel("Iteration")
+
+    plt.show()
 
 
 # Example:
@@ -76,7 +95,9 @@ if __name__ == "__main__":
         min_room_num=[1 for _ in range(len(rooms))],
         room_types=rooms
     ))
-    best_solution = bee_algorithm(NUM_BEES, NUM_ITERATIONS, rooms, CAPACITY, CORRIDOR_CAPACITY, BUDGET)
+    best_solution, fitness_history = bee_algorithm(NUM_BEES, NUM_ITERATIONS, rooms, CAPACITY, CORRIDOR_CAPACITY, BUDGET)
     print(f"Losowe rozwiązanie: {random_bee.fitness:.2e}")
     print("Najlepsze rozwiązanie:", best_solution)
     print(f"Wartość najlepszego rozwiązania: {best_solution.fitness:.2e}")
+
+    plot_history(fitness_history)

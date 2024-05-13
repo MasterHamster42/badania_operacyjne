@@ -31,7 +31,6 @@ class Bee:
 
 def send_close_to_bee(bee: Bee, rooms: list[RoomType]) -> Bee:
     position = bee.position
-    print(position.room_count, position.capacity, position.remaining_capacity, position.cost, position.budget)
     can_remove = [i for i, count in enumerate(position.room_count) if count > position.min_room_num[i]]
     remove = random.choice(can_remove)
     new_position = evolve(position)
