@@ -15,7 +15,7 @@ from src.populationcreator import PopulationCreator
 class GeneticSearch:
     def __init__(self, initial_population: list[model.Floor], crossover_method=None, parents_size=None) -> None:
         self.initial_population: list[model.Floor] = initial_population
-        self.NO_IMPROVEMENT_TIME = 10
+        self.NO_IMPROVEMENT_TIME = 20
         self.PARENTS_SIZE = len(self.initial_population)
         if crossover_method:
             self._crossover = crossover_method
@@ -188,6 +188,7 @@ def test(initial_population_size, rooms=None, N=100):
         f"mean iter no: {np.mean(iter_nos)}   |    iter no st dev: {np.std(iter_nos)}   |   max: {np.max(iter_nos)}   |   min: {np.min(iter_nos)}")
     plt.show()
     return improvements
+
 
 if __name__ == '__main__':
     population_config = PopulationConfig(seed=42)
