@@ -1,4 +1,3 @@
-import copy
 import random
 import sys
 
@@ -23,10 +22,11 @@ class Bee:
         return room.frequency_of_use * room.cost_per_day - room.cost_of_maintenance - room.cost_of_building
 
     def fitness_function(self):
-        return sum(
-                self.position.room_count[i] * self.room_profit(self.position.room_types[i])
-                for i in range(len(self.position.room_types))
-            )
+        income = 0
+        for room, count in zip(self.position.room_types, self.position.room_count):
+            income += room.cost_per_day * room.frequency_of_use - room.cost_of_maintenance
+            income *= count
+        return income
 
 
 def send_close_to_bee(bee: Bee, rooms: list[RoomType]) -> Bee:

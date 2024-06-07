@@ -1,6 +1,6 @@
 import random
 
-import factory
+import factory.random
 import prettyprinter.extras.attrs
 from prettyprinter import cpprint
 
@@ -37,6 +37,9 @@ class FloorFactory(factory.Factory):
     
     @factory.post_generation
     def room_types(self, _, extracted, **kwargs):
+        if "seed" in kwargs and kwargs['seed'] is not None:
+            random.seed(kwargs['seed'])
+
         self.room_types = extracted
         self.room_count = [x for x in self.min_room_num]
         
@@ -46,6 +49,7 @@ class FloorFactory(factory.Factory):
         budget = self.budget
         
         capacity -= self.corridor_capacity
+
         for room, count in zip(self.room_types, self.room_count):
             capacity -= room.size * count
             budget -= room.cost_of_building * count

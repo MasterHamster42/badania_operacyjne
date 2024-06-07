@@ -1,30 +1,10 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from src.model_factory import RoomTypeFactory, FloorFactory, RoomType
-from Bee import Bee, send_close_to_bee
-from constants import *
-
-
-def initialize_population(
-        population_size: int,
-        rooms: list[RoomType],
-        capacity: int,
-        corridor_capacity: int,
-        budget: int
-):
-    """init"""
-    min_room_num = [1 for _ in rooms]
-    positions = FloorFactory.build_batch(
-        size=population_size,
-        capacity=capacity,
-        corridor_capacity=corridor_capacity,
-        budget=budget,
-        min_room_num=min_room_num,
-        room_types=rooms
-    )
-    population = [Bee(position) for position in positions]
-    return population
+from src.PSO.Bee import Bee, send_close_to_bee
+from src.PSO.constants import BeeOptimizationConfig, PopulationConfig
+from src.model import Floor
+from src.populationcreator import PopulationCreator
 
 
 def update_best_solutions(global_best: list, new_bee: Bee):
@@ -32,42 +12,37 @@ def update_best_solutions(global_best: list, new_bee: Bee):
     fitness = new_bee.fitness
     if global_best[-1] is None or global_best[-1].fitness < fitness:
         global_best[-1] = new_bee
-        id = NUM_BEST_BEES - 1
+        id = len(global_best) - 1
         while id > 0 and (global_best[id - 1] is None or global_best[id - 1].fitness < fitness):
             global_best[id], global_best[id - 1] = global_best[id - 1], global_best[id]
             id -= 1
 
 
 def bee_algorithm(
-    population_size: int,
-    num_iterations: int,
-    rooms: list[RoomType],
-    capacity: int,
-    corridor_capacity: int,
-    budget: int
+    config: BeeOptimizationConfig,
+    population_creator: PopulationCreator,
+    initial_population: list[Floor]
 ) -> tuple[Bee, list[float]]:
-    population = initialize_population(population_size, rooms, capacity, corridor_capacity, budget)
-    global_best = [None for _ in range(NUM_BEST_BEES)]
-    """jak narazie global_best zostaja najlepsze odpowiedzi a wszystkie pszczoly sa wysylane gdzie indziej 
-    i jesli sa lepsze wyniki to sa aktualizowane jak nie to zostaje jak jest i ciagle sie szuka kolo tego samego miejsca"""
+    assert len(initial_population) == config.num_bees, "Population size must be equal to the bees random value"
+
+    population = [Bee(point) for point in initial_population]
+    global_best: list[None | Bee] = [None for _ in range(config.num_best_bees)]
     history = []
 
-    for _ in range(num_iterations):
+    for _ in range(config.num_iterations):
         for bee in population:
             update_best_solutions(global_best, bee)
 
         history.append(global_best[0].fitness)
 
-        population = initialize_population(
-            BEES_RANDOM, rooms, capacity, corridor_capacity, budget
-        )  #some bees going to random places, trying to not fell for local extremum
+        population = [Bee(point) for point in population_creator.create(size=config.bees_random)]
 
-        for bee in global_best[:NUM_STRICTLY_BEST_BEES]:  #more bees going to strictly best places
-            for _ in range(BEES_FOR_TOP_BEST):
-                population.append(send_close_to_bee(bee, rooms))
-        for bee in global_best[NUM_STRICTLY_BEST_BEES:]:  #less bees for not the best but good places
-            for _ in range(BEES_FOR_DOWN_BEST):
-                population.append(send_close_to_bee(bee, rooms))  # send_close_to_bee <- TO IMPLEMENT
+        for bee in global_best[:config.num_strictly_best_bees]:  #more bees going to strictly best places
+            for _ in range(config.bees_for_top_best):
+                population.append(send_close_to_bee(bee, population_creator.rooms))
+        for bee in global_best[config.num_strictly_best_bees:]:  #less bees for not the best but good places
+            for _ in range(config.bees_for_down_best):
+                population.append(send_close_to_bee(bee, population_creator.rooms))  # send_close_to_bee <- TO IMPLEMENT
 
     # for bee in global_best:
     #     print(bee.fitness)
@@ -87,16 +62,17 @@ def plot_history(history: list[float]) -> None:
 
 # Example:
 if __name__ == "__main__":
-    rooms = RoomTypeFactory.build_batch(size=NUM_ROOM_TYPES)
-    random_bee = Bee(FloorFactory.build(
-        capacity=CAPACITY,
-        corridor_capacity=CORRIDOR_CAPACITY,
-        budget=BUDGET,
-        min_room_num=[1 for _ in range(len(rooms))],
-        room_types=rooms
-    ))
-    best_solution, fitness_history = bee_algorithm(NUM_BEES, NUM_ITERATIONS, rooms, CAPACITY, CORRIDOR_CAPACITY, BUDGET)
-    print(f"Losowe rozwiązanie: {random_bee.fitness:.2e}")
+    population_config = PopulationConfig(seed=42)
+    population_creator = PopulationCreator(population_config, seed=42)
+    bee_config = BeeOptimizationConfig()
+    starting_population = population_creator.create(size=bee_config.num_bees)
+
+    best_solution, fitness_history = bee_algorithm(
+        bee_config,
+        population_creator,
+        starting_population
+    )
+    print(f"Losowe rozwiązanie: {starting_population[0].calculate_fitness():.2e}")
     print("Najlepsze rozwiązanie:", best_solution)
     print(f"Wartość najlepszego rozwiązania: {best_solution.fitness:.2e}")
 
