@@ -1,0 +1,5 @@
+20% - Jakub Czajka - Implementacja algorytmu pszczółkowego, testowanie programu, analiza wyników algorytmów genetycznego i pszczółkowego
+20% - Michał Kobiera - Implementacja algorytmu genetycznego, testowanie programu
+20% - Patryk Klatka - Wymyślenie oraz sformułowanie problemu, utworzenie modelu matematycznego, napisanie dokumentacji, testowanie programów
+20% - Maciej Pięta - Implementacja algorytmu genetycznego, testowanie algorytmu genetycznego
+20% - Martyna Sokołowska - Implementacja algorytmu pszczółkowego, testowanie programu
