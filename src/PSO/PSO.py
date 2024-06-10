@@ -21,7 +21,8 @@ def update_best_solutions(global_best: list, new_bee: Bee):
 def bee_algorithm(
     config: BeeOptimizationConfig,
     population_creator: PopulationCreator,
-    initial_population: list[Floor]
+    initial_population: list[Floor],
+    neighbourhood_function=send_close_to_bee,
 ) -> tuple[Bee, list[float]]:
     assert len(initial_population) == config.num_bees, "Population size must be equal to the bees random value"
 
@@ -39,10 +40,10 @@ def bee_algorithm(
 
         for bee in global_best[:config.num_strictly_best_bees]:  #more bees going to strictly best places
             for _ in range(config.bees_for_top_best):
-                population.append(send_close_to_bee2(bee, population_creator.rooms))
+                population.append(neighbourhood_function(bee, population_creator.rooms))
         for bee in global_best[config.num_strictly_best_bees:]:  #less bees for not the best but good places
             for _ in range(config.bees_for_down_best):
-                population.append(send_close_to_bee2(bee, population_creator.rooms))  # send_close_to_bee <- TO IMPLEMENT
+                population.append(neighbourhood_function(bee, population_creator.rooms))  # send_close_to_bee <- TO IMPLEMENT
 
     # for bee in global_best:
     #     print(bee.fitness)
@@ -70,7 +71,8 @@ if __name__ == "__main__":
     best_solution, fitness_history = bee_algorithm(
         bee_config,
         population_creator,
-        starting_population
+        starting_population,
+        neighbourhood_function=send_close_to_bee,
     )
     print(f"Losowe rozwiązanie: {starting_population[0].calculate_fitness():.2e}")
     print("Najlepsze rozwiązanie:", best_solution)
