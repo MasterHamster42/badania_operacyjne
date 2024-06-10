@@ -32,6 +32,7 @@ class Bee:
 def send_close_to_bee(bee: Bee, rooms: list[RoomType]) -> Bee:
     position = bee.position
     can_remove = [i for i, count in enumerate(position.room_count) if count > position.min_room_num[i]]
+
     remove = random.choice(can_remove)
     new_position = evolve(position)
     new_room_count = new_position.room_count
@@ -51,6 +52,34 @@ def send_close_to_bee(bee: Bee, rooms: list[RoomType]) -> Bee:
             break
 
         new_room = random.choice(candidates)
+        new_room_count[new_room] += 1
+
+    return Bee(new_position)
+
+
+def send_close_to_bee2(bee: Bee, rooms: list[RoomType]) -> Bee:
+    position = bee.position
+    can_remove = [i for i, count in enumerate(position.room_count) if count > position.min_room_num[i]]
+
+    remove = random.choice(can_remove)
+    new_position = evolve(position)
+    new_room_count = new_position.room_count
+    new_room_count[remove] -= 1
+
+    while True:
+        candidates = []
+        for i, room in enumerate(rooms):
+            if room.size > new_position.remaining_capacity:
+                continue
+            if room.cost_of_building + new_position.cost > new_position.budget:
+                continue
+
+            candidates.append(i)
+
+        if not candidates:
+            break
+
+        new_room = sorted(candidates, key=lambda i: rooms[i].cost_per_day * rooms[i].frequency_of_use)[-1]
         new_room_count[new_room] += 1
 
     return Bee(new_position)

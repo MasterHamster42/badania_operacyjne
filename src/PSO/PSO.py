@@ -1,7 +1,7 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from src.PSO.Bee import Bee, send_close_to_bee
+from src.PSO.Bee import Bee, send_close_to_bee, send_close_to_bee2
 from src.PSO.constants import BeeOptimizationConfig, PopulationConfig
 from src.model import Floor
 from src.populationcreator import PopulationCreator
@@ -39,10 +39,10 @@ def bee_algorithm(
 
         for bee in global_best[:config.num_strictly_best_bees]:  #more bees going to strictly best places
             for _ in range(config.bees_for_top_best):
-                population.append(send_close_to_bee(bee, population_creator.rooms))
+                population.append(send_close_to_bee2(bee, population_creator.rooms))
         for bee in global_best[config.num_strictly_best_bees:]:  #less bees for not the best but good places
             for _ in range(config.bees_for_down_best):
-                population.append(send_close_to_bee(bee, population_creator.rooms))  # send_close_to_bee <- TO IMPLEMENT
+                population.append(send_close_to_bee2(bee, population_creator.rooms))  # send_close_to_bee <- TO IMPLEMENT
 
     # for bee in global_best:
     #     print(bee.fitness)
@@ -62,8 +62,8 @@ def plot_history(history: list[float]) -> None:
 
 # Example:
 if __name__ == "__main__":
-    population_config = PopulationConfig(seed=42)
-    population_creator = PopulationCreator(population_config, seed=42)
+    population_config = PopulationConfig(seed=40)
+    population_creator = PopulationCreator(population_config, seed=40)
     bee_config = BeeOptimizationConfig()
     starting_population = population_creator.create(size=bee_config.num_bees)
 
